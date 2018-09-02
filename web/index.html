@@ -1,0 +1,53 @@
+<html>
+    <header>
+        <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+    </header>
+    <body>
+        <pre id="text"></pre>
+    </body>
+    <script>
+
+        const getABI = async (type) => {
+            let res = await fetch(`http://localhost:10000/contracts/${type}.json`)
+            const contract = await res.json()
+            return contract.abi
+        }
+
+        const getCandidates = async () => {
+            let res = await fetch("http://localhost:8000/getCandidates")
+            var x = window.candidates = await res.json()
+            x = _.flatten(x)
+            x = _.chunk(x, 2)
+            x = x.reduce((struct, [k, v]) => ({...struct, [k]: v}), {})
+            return x
+        }
+
+        const run = () => {
+            getCandidates().then((x) => {
+                let elem = document.getElementById("text")
+                elem.innerHTML = JSON.stringify(x, undefined, 4)
+            })
+        }
+
+        const connect = async () => {
+            // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+            if (typeof web3 !== 'undefined') {
+                // Use Mist/MetaMask's provider
+                web3js = new Web3(web3.currentProvider);
+            } else {
+                const err = "No web3? You should consider trying MetaMask!"
+                alert(err)
+                throw err
+            }
+
+            const contract = web3js.eth.contract(await getABI("actions"))
+            
+            Ballot = contract.at("0x2f94926B497cEe8C02d891ec5300404cc45e5a93")
+        }
+
+        window.addEventListener("load", connect)
+        run()
+
+    </script>
+</html>
