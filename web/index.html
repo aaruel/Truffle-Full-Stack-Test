@@ -9,7 +9,7 @@
     <script>
 
         const getABI = async (type) => {
-            let res = await fetch(`http://localhost:10000/contracts/${type}.json`)
+            let res = await fetch(`/contracts/${type}.json`)
             const contract = await res.json()
             return contract.abi
         }
@@ -17,9 +17,6 @@
         const getCandidates = async () => {
             let res = await fetch("http://localhost:8000/getCandidates")
             var x = window.candidates = await res.json()
-            x = _.flatten(x)
-            x = _.chunk(x, 2)
-            x = x.reduce((struct, [k, v]) => ({...struct, [k]: v}), {})
             return x
         }
 
